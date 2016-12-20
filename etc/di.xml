@@ -1,0 +1,38 @@
+<?xml version="1.0"?>
+<!--
+/**
+* @copyright Copyright (c) 2016 www.magebuzz.com
+*/
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <virtualType name="StorelocatorGirdFilterPool" type="Magento\Framework\View\Element\UiComponent\DataProvider\FilterPool">
+        <arguments>
+            <argument name="appliers" xsi:type="array">
+                <item name="regular" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\RegularFilter</item>
+                <item name="fulltext" xsi:type="object">Magento\Framework\View\Element\UiComponent\DataProvider\FulltextFilter</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <preference for="Magebuzz\Storelocator\Api\Data\StoreInterface" type="Magebuzz\Storelocator\Model\Store" />
+    <virtualType name="StoreGridDataProvider" type="Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider">
+        <arguments>
+            <argument name="collection" xsi:type="object" shared="false">Magebuzz\Storelocator\Model\Resource\Store\Collection</argument>
+            <argument name="filterPool" xsi:type="object" shared="false">StorelocatorGirdFilterPool</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="Magebuzz\Storelocator\Model\ResourceModel\Store\Grid\Collection" type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
+        <arguments>
+            <argument name="mainTable" xsi:type="string">mb_store_locator</argument>
+            <argument name="resourceModel" xsi:type="string">Magebuzz\Storelocator\Model\ResourceModel\Store</argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Magento\Framework\View\Element\UiComponent\DataProvider\CollectionFactory">
+        <arguments>
+            <argument name="collections" xsi:type="array">
+                <item name="storelocator_store_listing_data_source" xsi:type="string">Magebuzz\Storelocator\Model\ResourceModel\Store\Grid\Collection</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

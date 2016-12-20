@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<!--
+/**
+* @copyright Copyright (c) 2016 www.magebuzz.com
+*/
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <storelocator>
+            <general>
+                <!-- <enabled>1</enabled> -->
+                <google_geo_api_url>http://maps.googleapis.com/maps/api/geocode/json</google_geo_api_url>
+                <show_search_form>1</show_search_form>
+                <enable_search_suggestion>1</enable_search_suggestion>
+                <default_store_icon>default/store_icon.png</default_store_icon>
+                   <search_radius>5,10,25,50,75,100</search_radius>
+                <default_search_radius>25</default_search_radius>
+                <distance_units>0</distance_units>
+                <show_top_link>1</show_top_link>
+                <show_email_and_website>0</show_email_and_website>
+                <page_type>1</page_type>
+                <show_per_page_values>10,20,30</show_per_page_values>
+                <show_per_page>10</show_per_page>
+                <display_tag_filter>1</display_tag_filter>
+            </general>
+        </storelocator>
+    </default>
+</config>

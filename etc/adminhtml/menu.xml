@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+* @copyright Copyright (c) 2016 www.magebuzz.com
+*/
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="Magebuzz_Storelocator::storelocator" title="Store Locator" module="Magebuzz_Storelocator"
+             sortOrder="50" resource="Magebuzz_Storelocator::storelocator"/>
+        <add id="Magebuzz_Storelocator::mange_store_locator" title="Manage Stores" module="Magebuzz_Storelocator"
+             sortOrder="10" parent="Magebuzz_Storelocator::storelocator" action="storelocator/store"
+             resource="Magebuzz_Storelocator::mange_store_locator"/>
+        <!-- <add id="Magebuzz_Storelocator::import" title="Import Stores" module="Magebuzz_Storelocator" sortOrder="20" parent="Magebuzz_Storelocator::storelocator" action="storelocator/import" resource="Magebuzz_Storelocator::import"/> -->
+        <add id="Magebuzz_Storelocator::setting" title="Settings" module="Magebuzz_Storelocator" sortOrder="30"
+             parent="Magebuzz_Storelocator::storelocator" action="adminhtml/system_config/edit/section/storelocator"
+             resource="Magebuzz_Storelocator::setting"/>
+    </menu>
+</config>

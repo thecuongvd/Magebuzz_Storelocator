@@ -1,0 +1,28 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * @copyright Copyright (c) 2016 www.magebuzz.com
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magebuzz_Storelocator::storelocator" title="Magebuzz Help Desk"
+                          sortOrder="210">
+                    <resource id="Magebuzz_Storelocator::mange_store_locator" title="Manage Stores"
+                              sortOrder="10"/>
+                    <resource id="Magebuzz_Storelocator::setting" title="Settings" sortOrder="20"/>
+                </resource>
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="Magebuzz_Storelocator::config_storelocator" title="Store Locator Section" />
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

@@ -1,0 +1,471 @@
+<?php
+/**
+ * @copyright Copyright (c) 2016 www.magebuzz.com
+ */
+?>
+<?php
+$_helper = $block->getStorelocatorHelper();
+$stores = $block->getStores();
+$stores->clear();
+?>
+<?php if ((!$stores->getSize()) && (!$block->getStoreQuery())) : ?>
+    <p class='note-msg'><?php echo __('No stores are available.') ?></p>
+<?php else: ?>
+    <script type="text/javascript" src="<?php echo $block->getScriptUrl(); ?>"></script>
+    <p class='note-msg' id="message" style="display:none"></p>
+    <div class="storelocator">
+        <?php if ($block->displaySearchForm()): ?>
+            <div class="store-search">
+                <div class="fieldset clearfix">
+                    <h2 class="legend"><?php echo __('Search Stores') ?></h2>
+
+                    <form id='find_nearest_form' method="get" action="<?php echo $block->getUrl('storelocator') ?>">
+                        <ul class="form-list">
+                            <li class="fields">
+                                <div class="field">
+                                    <div class="input-box">
+                                        <input id="current_latitude" type="hidden" name="current_latitude" value=""/>
+                                        <input id="current_longitude" type="hidden" name="current_longitude" value=""/>
+                                    </div>
+                                </div>
+                                <div class="buttons-set">
+                                    <button type="submit" class="button"
+                                            title="<?php echo __('Find Nearest Stores') ?>">
+                                        <span><span><?php echo __('Find Nearest Stores') ?></span></span></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </form>
+
+                    <form id="query_form" method="get" action="<?php echo $block->getUrl('storelocator') ?>">
+                        <ul class="form-list">
+                            <li class="fields">
+                                <div class="field search-store">
+                                    <div class="search-store-field">
+                                        <label class="search-store-label"
+                                               for="search-store"><?php echo __('Search by Postcode or Address') ?></label>
+                                        <input type="hidden" name="query" id="mb-query-search">
+                                        <input
+                                            type="search"
+                                            class="search-store-input"
+                                            id="search-store"
+                                            name="q"
+                                            value="<?php echo $block->getSearchQueryText(); ?>"
+                                            <?php if ($_helper->enableSearchSuggestion()): ?>
+                                                data-mage-init='<?php echo $block->escapeHtml($this->helper('Magento\Framework\Json\Helper\Data')->jsonEncode($block->getWidgetInitOptions())) ?>'
+                                            <?php endif; ?>>
+                                    </div>
+                                    <script data-template="search-suggest" type="text/x-magento-template">
+                                        <ul class="search-store-menu">
+                                            <% if (data.items.length) { %>
+                                            <% _.each(data.items, function(value){ %>
+                                            <li class="item"
+                                            <%- data.optionData(value) %>
+                                            >
+                                            <a href="<%- value.url %>" class="title mb-query-url"><%- value.address
+                                                %></a>
+                                            </li>
+                                            <% }); %>
+                                            <% } else { %>
+                                            <li>
+                                                <span class="mage-suggest-no-records">
+                                                    <?php /* @escapeNotVerified */
+                                                    echo __('No records found.') ?>
+                                                </span>
+                                            </li>
+                                            <% } %>
+                                        </ul>
+                                    </script>
+                                </div>
+                                <?php $searchRadiusOptions = $block->getSearchRadiusOptions(); ?>
+                                <?php if (count($searchRadiusOptions)): ?>
+                                    <div class="field search-store-in">
+                                        <label for="searchin"><?php echo __('Search in') ?></label>
+
+                                        <div class="input-box">
+                                            <select name="d" id="searchin">
+                                                <?php foreach ($searchRadiusOptions as $option): ?>
+                                                    <option
+                                                        value="<?php echo $option['value'] ?>" <?php if ($option['value'] == $block->getSearchRadius()): ?> selected<?php endif; ?>><?php echo $option['label'] ?> </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="buttons-set">
+                                    <button type="submit" class="button" title="<?php echo __('Search') ?>">
+                                        <span><span><?php echo __('Search') ?></span></span></button>
+                                    <button type="button"
+                                            onclick="window.location.href = '<?php echo $block->getUrl('storelocator') ?>'"
+                                            class="button" title="<?php echo __('Reset') ?>">
+                                        <span><span><?php echo __('Reset') ?></span></span></button>
+                                </div>
+                            </li>
+                        </ul>
+                    </form>
+
+                </div>
+            </div>
+        <?php endif ?>
+
+        <div class="store-body-2columns" id="gmap-container">
+            <?php if ($_helper->canShowTagFilter()): ?>
+                <?php $listTag = $block->getListTag(); ?>
+                <?php if (count($listTag) > 0): ?>
+                    <div class="list-all-store-by-tag">
+                        <div class="fieldset clearfix">
+                            <h2 class="legend"><?php echo __('Store By Tag') ?></h2>
+                            <ul class="list-tag">
+                                <li class="tag-item">
+                                    <?php $tag_param = $block->getRequest()->getParam('tag'); ?>
+                                    <a href="<?php echo $block->getUrl('storelocator', array('_secure' => TRUE)); ?>"
+                                       class="<?php if (!$tag_param) {
+                                           echo 'tag_active';
+                                       } ?>"><?php echo __('Show All'); ?></a>
+                                </li>
+                                <?php foreach ($listTag as $tag): ?>
+                                    <li class="tag-item">
+                                        <a class="mb-tag-url<?php if ($tag == $tag_param) {
+                                            echo ' tag_active';
+                                        } ?>" data-tag="<?php echo $tag; ?>"><?php echo $tag; ?></a>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            <?php endif; ?>
+            <div class="gmap">
+                <div id="map_canvas" style="float:right;width:100%; height:350px"></div>
+            </div>
+
+            <div class="fieldset clearfix list-all-store">
+                <h2 class="legend"><?php echo __('Stores') ?></h2>
+                <?php if ($query = $block->getStoreQuery()): ?>
+                    <p class="search-note"><?php echo __('Search result for <strong>%1</strong>', $query); ?></p>
+                <?php endif ?>
+                <?php if ($stores->getSize()): ?>
+                    <?php echo $block->getPagerHtml(); ?>
+                    <table class="data-table" id="store-list">
+                        <colgroup>
+                            <col>
+                            <col>
+                            <col>
+                            <?php if ($block->showEmailAndWebsite()): ?>
+                                <col width="1">
+                                <col width="1">
+                            <?php endif; ?>
+                        </colgroup>
+                        <thead>
+                        <tr>
+                            <th><?php echo __('Store') ?></th>
+                            <th><?php echo __('Address') ?></th>
+                            <th><?php echo __('Phone') ?></th>
+                            <?php if ($block->getStoreQuery()) : ?>
+                                <th>
+                                    <?php
+                                    $unit = $_helper->getRadiusUnit() ? 'Kilometers' : 'Miles';
+                                    echo __('Distance') . ' (' . $unit . ')';
+                                    ?>
+                                </th>
+                            <?php endif; ?>
+                            <?php if ($block->showEmailAndWebsite()): ?>
+                                <th><?php echo __('Email') ?></th>
+                                <th><?php echo __('Website') ?></th>
+                            <?php endif; ?>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($stores->getItems() as $store): ?>
+                            <tr class="mb-go-to-store" data-id='<?php echo $store->getId() ?>'
+                                data-icon='<?php echo $block->getCommonIconUrl(); ?>'>
+                                <td><?php echo $store->getTitle(); ?></td>
+                                <td><?php echo $store->getAddress(); ?></td>
+                                <td><?php echo $store->getPhone(); ?></td>
+                                <?php if ($block->getStoreQuery()) : ?>
+                                    <td>
+                                        <?php
+                                        if (!$_helper->getRadiusUnit()) {
+                                            echo sprintf('%.2f', $store->getDistance());
+                                        } else {
+                                            echo sprintf('%.2f', $store->getDistance() * 1.609344);
+                                        }
+                                        ?>
+                                    </td>
+                                <?php endif; ?>
+                                <?php if ($block->showEmailAndWebsite()): ?>
+                                    <td><?php echo $store->getEmail(); ?></td>
+                                    <td><?php echo $store->getWebsite(); ?></td>
+                                <?php endif ?>
+                            </tr>
+                            <input type="hidden" name="store-icon" id="store_icon_<?php echo $store->getId() ?>"
+                                   value="<?php echo $store->getIcon() ?>"/>
+                            <input type="hidden" name="store-longitude"
+                                   id="store_latitude_<?php echo $store->getId() ?>"
+                                   value="<?php echo $store->getLatitude() ?>"/>
+                            <input type="hidden" name="store-longitude"
+                                   id="store_longitude_<?php echo $store->getId() ?>"
+                                   value="<?php echo $store->getLongitude() ?>"/>
+                            <input type="hidden" name="store-title" id="store_title_<?php echo $store->getId() ?>"
+                                   value="<?php echo $store->getTitle() ?>"/>
+                            <input type="hidden" name="store-address"
+                                   id="store_address_<?php echo $store->getId() ?>"
+                                   value="<?php echo $store->getAddress() ?>"/>
+                            <div class="store-info" style="display:none;"
+                                 id="store_highlight_<?php echo $store->getId() ?>">
+                                <div class="popup-store-img">
+                                    <img src="<?php echo $block->getIconUrl($store->getIcon()); ?>" title="<?php echo $store->getTitle(); ?>" />
+                                </div>
+                                <div class="popup-store-info">
+                                    <p><strong><?php echo $store->getTitle() ?></strong></p>
+                                    <?php if ($store->getDescription()): ?>
+                                        <p><?php echo $store->getDescription() ?></p>
+                                    <?php endif; ?>
+                                    <p><?php echo __('Address') ?>: <?php echo $store->getAddress() ?></p>
+                                    <?php if ($store->getPostalCode()): ?>
+                                        <p><?php echo __('Postcode') ?>: <?php echo $store->getPostalCode() ?></p>
+                                    <?php endif; ?>
+                                    <?php if ($store->getPhone()): ?>
+                                        <p><?php echo __('Phone') ?>: <?php echo $store->getPhone() ?></p>
+                                    <?php endif; ?>
+                                    <?php if ($store->getWebsite()): ?>
+                                        <p><?php echo __('Website') ?>: <?php echo $store->getWebsite() ?></p>
+                                    <?php endif; ?>
+                                    <p>
+                                        <b><?php echo __('Get Directions') ?>:</b>
+                                        <a href="#" class="mb-to-here"
+                                           data-store-id="<?php echo $store->getId() ?>"><?php echo __('To Here') ?></a> -
+                                        <a href="#" class="mb-from-here"
+                                           data-store-id="<?php echo $store->getId() ?>"><?php echo __('From Here') ?></a>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                <?php else: ?>
+                    <p class="note-msg"><?php echo __('There are no stores matching your selection.'); ?></p>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <?php $defaultlatlong = $block->getDefaultLatLong(); ?>
+    <script>
+        require(['jquery'], function ($) {
+            window.onload = getCurrentClientPosition();
+            window.onload = initialize();
+
+            var map,
+                infoWindow,
+                directionsDisplay,
+                directionsService = new google.maps.DirectionsService(),
+                reasons = [];
+            // reasons[OK] = "Success";
+            // reasons[NOT_FOUND] = "One of the locations specified in the requests could not be geocoded";
+            // reasons['ZERO_RESULTS'] = "No route could be found between the origin and destination";
+            // reasons[MAX_WAYPOINTS_EXCEEDED] = "Too many waypoints";
+            // reasons[INVALID_REQUEST] = "Invalid Request";
+            // reasons[OVER_QUERY_LIMIT]   = "Too Many Queries: The daily geocoding quota for block site has been exceeded.";
+            // reasons[REQUEST_DENIED]   = "A directions request could not be successfully parsed.";
+            // reasons[UNKNOWN_ERROR]   = "The DirectionsService could not compute directions between the points.";
+
+            function getCurrentClientPosition() {
+                //get current position of client
+                if (navigator.geolocation) {
+                    // if browser support to get geo position
+                    navigator.geolocation.getCurrentPosition(function (position) {
+                        if (position) {
+                            $("#current_latitude").val(position.coords.latitude);
+                            $("#current_longitude").val(position.coords.longitude);
+                        } else {
+                            $("#message").html() = <?php echo __("'Your current location is temporarily unavailable'") ?>;
+                            $("#message").show();
+                        }
+                    });
+                } else {
+                    $('#message').html() = <?php echo __("'Your browser DOES NOT support Finding the Nearest Store'") ?>;
+                    $('#find_nearest_form').hide();
+                }
+            }
+
+            function initialize() {
+                $('form#query_form').submit(function () {
+                    $('input[name=query]').remove();
+                    return true;
+                });
+
+                $('.mb-go-to-store').click(function (e) {
+                    var id = $(this).data('id');
+                    var iconUrl = $(this).data('icon');
+                    showLocationOnMap(id, iconUrl);
+                });
+
+                $('.mb-tag-url').on('click', function (e) {
+                    var tag = $(this).data('tag');
+                    tagUrl(tag);
+                });
+
+                infoWindow = new google.maps.InfoWindow;
+
+                google.maps.event.addListener(infoWindow, 'domready', function () {
+                    $('a.mb-to-here').on('click', function (e) {
+                        e.preventDefault();
+                        var storeId = $(this).data('store-id');
+                        tohere(storeId);
+                    });
+
+                    $('a.mb-from-here').on('click', function (e) {
+                        e.preventDefault();
+                        var storeId = $(this).data('store-id');
+                        fromhere(storeId);
+                    });
+
+                    $('form#mb-map-form').on('submit', function (e) {
+                        e.preventDefault();
+                        calcRoute();
+                    });
+                });
+
+                var myOptions = {
+                    zoom: 12,
+                    <?php if (!empty($defaultlatlong['lat']) && !empty($defaultlatlong['long'])): ?>
+                    center: new google.maps.LatLng(<?php echo $defaultlatlong['lat'] ?>, <?php echo $defaultlatlong['long'] ?>),
+                    <?php endif; ?>
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                }
+
+                map = new google.maps.Map(document.getElementById('map_canvas'), myOptions);
+
+                directionsDisplay = new google.maps.DirectionsRenderer();
+                directionsDisplay.setMap(map);
+
+                google.maps.event.addListener(map, 'click', function () {
+                    infoWindow.close();
+                });
+
+                // auto display store markers in the map
+                <?php foreach ($stores->getItems() as $store): ?>
+                var store_icon = '<?php echo $block->getCommonIconUrl(); ?>';
+                var id = '<?php echo $store->getId() ?>';
+                var marker_<?php echo $store->getId() ?> = new google.maps.Marker({
+                    position: new google.maps.LatLng($('#store_latitude_' + id).val(), $('#store_longitude_' + id).val()),
+                    map: map,
+                    icon: store_icon,
+                    title: $('#store_title_' + id).val()
+                });
+                google.maps.event.addListener(marker_<?php echo $store->getId() ?>, "click", function () {
+                    infoWindow.setContent($('#store_highlight_' +<?php echo $store->getId() ?>).html());
+                    infoWindow.open(map, marker_<?php echo $store->getId() ?>);
+                });
+                <?php endforeach; ?>
+            }
+
+            function showLocationOnMap(id, store_icon) {
+                window.location.hash = "gmap-container";
+                var infoContent = $('#store_highlight_' + id).html();
+
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng($('#store_latitude_' + id).val(), $('#store_longitude_' + id).val()),
+                    map: map,
+                    icon: store_icon,
+                    title: $('#store_title_' + id).val()
+                });
+                infoWindow.setContent(infoContent);
+                infoWindow.open(map, marker);
+
+                google.maps.event.addListener(marker, 'click', function () {
+                    infoWindow.setContent(infoContent);
+                    infoWindow.open(map, marker);
+                });
+            }
+
+            function calcRoute() {
+                var start = $("#saddr").val();
+                var end = $("#daddr").val();
+                var request = {
+                    origin: start,
+                    destination: end,
+                    travelMode: google.maps.TravelMode.DRIVING
+                };
+                directionsService.route(request, function (result, status) {
+                    if (status == google.maps.DirectionsStatus.OK) {
+                        directionsDisplay.setDirections(result);
+                    }
+                    else {
+                        alert("Failed to obtain directions");
+                    }
+                });
+            }
+
+            //show direction form
+            function fromhere(id) {
+                var html = '<p>Directions: <a href="#" class="mb-to-here" data-store-id=' + id + '>To here<\/a> - <b>From here<\/b></p>' +
+                    '<br>End address:<form id="mb-map-form">' +
+                    '<input type="text" SIZE=40 MAXLENGTH=40 name="daddr" id="daddr" value="" /><br>' +
+                    '<INPUT value="Get Directions" TYPE="SUBMIT"><br>' +
+                        //  'Walk <input type="checkbox" name="walk" id="walk" /> &nbsp; Avoid Highways <input type="checkbox" name="highways" id="highways" />' +
+                    '<input type="hidden" id="saddr" value="' + $('#store_address_' + id).val() +
+                    '"/>';
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng($('#store_latitude_' + id).val(), $('#store_longitude_' + id).val()),
+                    map: map,
+                    icon: $('#store_icon_' + id).val(),
+                    title: $('#store_title_' + id).val()
+                });
+                infoWindow.setContent(html);
+                infoWindow.open(map, marker);
+            }
+
+            function tohere(id) {
+                var html = '<p>Directions: <b>To here<\/b> - <a href="#" class="mb-from-here" data-store-id=' + id + '>From here<\/a></p>' +
+                    '<br>Start address:<form id="mb-map-form">' +
+                    '<input type="text" SIZE=40 MAXLENGTH=40 name="saddr" id="saddr" value="" /><br>' +
+                    '<INPUT value="Get Directions" TYPE="SUBMIT"><br>' +
+                        //  'Walk <input type="checkbox" name="walk" id="walk" /> &nbsp; Avoid Highways <input type="checkbox" name="highways" id="highways" />' +
+                    '<input type="hidden" id="daddr" value="' + $('#store_address_' + id).val() +
+                    '"/>';
+
+                var marker = new google.maps.Marker({
+                    position: new google.maps.LatLng($('#store_latitude_' + id).val(), $('#store_longitude_' + id).val()),
+                    map: map,
+                    icon: $('#store_icon_' + id).val(),
+                    title: $('#store_title_' + id).val()
+                });
+                infoWindow.setContent(html);
+                infoWindow.open(map, marker);
+            }
+
+            function tagUrl(tag) {
+                var url = "<?php echo $block->getUrl('*/*/*', array('_current' => TRUE)); ?>";
+                var replaceUrl = removeParam('tag', url);
+                <?php $param = $block->getRequest()->getParams(); ?>
+                <?php if (count($param) > 0) : ?>
+                replaceUrl = replaceUrl + "&tag=" + tag;
+                <?php else: ?>
+                replaceUrl = replaceUrl + "?tag=" + tag;
+                <?php endif; ?>
+                window.location.href = replaceUrl;
+            }
+
+            function removeParam(key, sourceURL) {
+                var rtn = sourceURL.split("?")[0],
+                    param,
+                    params_arr = [],
+                    queryString = (sourceURL.indexOf("?") !== -1) ? sourceURL.split("?")[1] : "";
+                if (queryString !== "") {
+                    params_arr = queryString.split("&");
+                    for (var i = params_arr.length - 1; i >= 0; i -= 1) {
+                        param = params_arr[i].split("=")[0];
+                        if (param === key) {
+                            params_arr.splice(i, 1);
+                        }
+                    }
+                    rtn = rtn + "?" + params_arr.join("&");
+                }
+                return rtn;
+            }
+        });
+
+    </script>
+<?php endif; ?>

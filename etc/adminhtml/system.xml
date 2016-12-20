@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<!--
+/**
+* @copyright Copyright (c) 2016 www.magebuzz.com
+*/
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <tab id="magebuzz" class="magebuzz-config-tab" translate="label" sortOrder="9000">
+            <label>Extensions</label>
+        </tab>
+        <section id="storelocator" translate="label" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <class>separator-top</class>
+            <label>Store Locator</label>
+            <tab>magebuzz</tab>
+            <resource>Magebuzz_Storelocator::config_storelocator</resource>
+            <group id="general" translate="label" type="text" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>General Options</label>
+                <!-- <field id="enabled" translate="label" type="select" sortOrder="0" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Store Locator System</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field> -->
+                <field id="google_geo_api_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google Geo API URL</label>
+                    <comment><![CDATA[Leave empty for default.<br/>Format: <b>http://maps.googleapis.com/maps/api/geocode/json</b>]]></comment>
+                </field>
+                <field id="google_api_key" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Google API Key</label>
+                    <comment><![CDATA[<a href="https://code.google.com/apis/console">Get API key for your domain. It is required if you want to have more than 25k request per day.</a>]]></comment>
+                </field>
+                <field id="show_search_form" translate="label" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Allow Customer to Search Store</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="enable_search_suggestion" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enable Ajax Suggestions when Typing Searching Address</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="default_location_address" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Location Address</label>
+                </field>
+                <field id="default_store_icon" translate="label comment" type="image" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Store Icon</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Image</backend_model>
+                    <upload_dir config="system/filesystem/media" scope_info="1">magebuzz/storelocator</upload_dir>
+                    <base_url type="media" scope_info="1">magebuzz/storelocator</base_url>
+                </field>
+                <field id="search_radius" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Search Radius</label>
+                    <comment><![CDATA[Separated by comma.]]></comment>
+                </field>
+                <field id="default_search_radius" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Default Search Radius</label>
+                </field>
+                <field id="distance_units" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Distance Unit</label>
+                    <source_model>Magebuzz\Storelocator\Model\Config\Source\DistanceUnit</source_model>
+                </field>
+                <field id="show_top_link" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Link on Top Menu</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="show_email_and_website" translate="label" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Show Email And Website</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="page_type" translate="label" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Page Type</label>
+                    <source_model>Magebuzz\Storelocator\Model\Config\Source\PageType</source_model>
+                </field>
+                <field id="show_per_page_values" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Stores per Page Allowed Values</label>
+                    <comment><![CDATA[Separated by comma.]]></comment>
+                    <validate>validate-per-page-value-list</validate>
+                </field>
+                <field id="show_per_page" translate="label" type="text" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Stores per Page Default Value</label>
+                    <comment><![CDATA[Must be in the allowed values list.]]></comment>
+                    <validate>validate-per-page-value</validate>
+                </field>
+                <field id="display_tag_filter" translate="label" type="select" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Display Filter by Tags</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

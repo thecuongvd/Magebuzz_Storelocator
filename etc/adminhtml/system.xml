@@ -40,7 +40,7 @@
                     <label>Default Location Address</label>
                 </field>
                 <field id="default_store_icon" translate="label comment" type="image" sortOrder="55" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Default Store Icon</label>
+                    <label>Default Store Image</label>
                     <backend_model>Magento\Config\Model\Config\Backend\Image</backend_model>
                     <upload_dir config="system/filesystem/media" scope_info="1">magebuzz/storelocator</upload_dir>
                     <base_url type="media" scope_info="1">magebuzz/storelocator</base_url>
